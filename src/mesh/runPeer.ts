@@ -8,7 +8,7 @@ import { WebSocketServer } from "ws";
 import { createMeshPeer } from "./peer.js";
 import { loadOrCreateKeypair, publicKeyToPeerId } from "./identity.js";
 
-const PORT = Number(process.env.MESH_PEER_PORT) || 5000;
+const PORT = Number(process.env.PORT) || Number(process.env.MESH_PEER_PORT) || 5000;
 const HOST = process.env.HOST ?? "0.0.0.0";
 const BOOTSTRAP_URL = process.env.MESH_BOOTSTRAP_URL ?? "http://localhost:4000/bootstrap.json";
 const MESH_STORE_PATH = process.env.MESH_STORE_PATH ?? "./data/mesh.db";

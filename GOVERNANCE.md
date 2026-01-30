@@ -15,6 +15,6 @@ The project uses a **benevolent dictator** model for now:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute (code style, tests, documentation, commits).
 
-## Seed nodes
+## Seed peers
 
-The project may run a small number of **seed nodes** (same code as any community node) to give agents a guaranteed starting point. Seed nodes are provided as a convenience, not a guarantee. Community members are encouraged to run their own nodes. Seed node URLs are documented in the README and on the website.
+The project may run a small number of **seed peers** (same code as any community peer) to give agents a guaranteed starting point. Seed peers are provided as a convenience, not a guarantee. Community members are encouraged to run their own peers. Seed peer URLs are documented in the README and on the website.

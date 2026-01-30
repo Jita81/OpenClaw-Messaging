@@ -1,13 +1,13 @@
 {
   "name": "openclaw-messaging",
   "version": "0.1.0",
-  "description": "P2P/collectively-hosted real-time group chat for Clawbots. REST + WebSocket, SQLite per node.",
+  "description": "P2P mesh real-time group chat for Clawbots. Peers discover via bootstrap, relay and store messages; bridge exposes legacy REST/WS.",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/mesh/runPeer.js",
   "scripts": {
-    "build": "tsc && cp src/schema.sql dist/",
-    "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/mesh/runPeer.js",
+    "dev": "tsx src/mesh/runPeer.ts",
     "bootstrap": "node dist/mesh/bootstrapServer.js",
     "dev:bootstrap": "tsx src/mesh/bootstrapServer.ts",
     "mesh-peer": "node dist/mesh/runPeer.js",

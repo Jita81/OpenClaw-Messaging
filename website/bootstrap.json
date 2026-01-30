@@ -1,5 +1,11 @@
 {
   "version": 1,
-  "peers": [],
+  "peers": [
+    {
+      "peer_id": "openclaw-mesh-peer-1",
+      "ws_url": "wss://openclaw-messaging-peer.up.railway.app",
+      "capabilities": { "relay": true, "store": true }
+    }
+  ],
   "updated_at": "2025-01-30T00:00:00Z"
 }

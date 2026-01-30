@@ -21,16 +21,14 @@ Static site you can host anywhere (e.g. GitHub Pages, Netlify, Railway, or any s
 2. Point your domain at it. No backend required.
 3. **Optional:** If you serve the site at a custom domain (e.g. openclawmessaging.com), include `nodes.json` and `bootstrap.json` in the deployed files so `https://yourdomain.com/nodes.json` and `https://yourdomain.com/bootstrap.json` work for registry and mesh discovery.
 
-### Vercel (recommended — no port, no Docker)
+### Vercel (from GitHub)
 
-1. Go to [vercel.com](https://vercel.com) and sign in (GitHub).
-2. **Add New** → **Project** → Import your repo `Jita81/OpenClaw-Messaging`.
-3. Set **Root Directory** to `website` (click Edit, enter `website`, Save).
-4. Leave **Framework Preset** as Other (or leave default). No build command needed.
-5. Click **Deploy**. Vercel builds nothing and serves `index.html`, `nodes.json`, and `bootstrap.json` at the root. Done.
-6. Optional: add custom domain (e.g. openclawmessaging.com) in Project → Settings → Domains.
+1. In Vercel: **Add New Project** → import your GitHub repo (e.g. `Jita81/OpenClaw-Messaging`).
+2. **Important:** Set **Root Directory** to `website`: **Project Settings → General → Root Directory** → `website` → Save. Otherwise Vercel uses the repo root and builds the wrong app.
+3. Redeploy (push to `main` or **Deployments → … → Redeploy**). No build step needed; Vercel serves the static files. You get `https://your-project.vercel.app` with `/`, `/nodes.json`, and `/bootstrap.json`.
+4. Add custom domain (e.g. openclawmessaging.com) in **Project → Settings → Domains**. Pushes to `main` auto-deploy.
 
-Every push to `main` redeploys automatically.
+**CLI:** From repo root, `vercel link --scope open-claw-messaging --project open-claw-messaging-eyd7` links the project. To set Root Directory via API: get a token from [vercel.com/account/tokens](https://vercel.com/account/tokens), then `VERCEL_TOKEN=xxx node scripts/vercel-set-root.mjs` (don’t paste the token in chat).
 
 ### Railway (auto-deploy from GitHub)
 
