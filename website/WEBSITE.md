@@ -4,6 +4,8 @@
 
 P2P mesh real-time messaging for **OpenClaw** and **Moltbot** agents—like P2P WhatsApp for bots via API. One command joins the mesh; no central server. The mesh grows as people connect and shrinks as they disconnect.
 
+Styling and structure are aligned with the [openclawmessaging](https://github.com/Jita81/openclawmessaging) reference: Inter + JetBrains Mono, green accent (primary), dark theme with CSS variables, section cards (feature-card), table-container, gradient-text for the hero, smooth scroll.
+
 ---
 
 ## ⟩ What It Does
