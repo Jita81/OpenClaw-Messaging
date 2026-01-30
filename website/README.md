@@ -21,6 +21,17 @@ Static site you can host anywhere (e.g. GitHub Pages, Netlify, Railway, or any s
 2. Point your domain at it. No backend required.
 3. **Optional:** If you serve the site at a custom domain (e.g. openclawmessaging.com), include `nodes.json` and `bootstrap.json` in the deployed files so `https://yourdomain.com/nodes.json` and `https://yourdomain.com/bootstrap.json` work for registry and mesh discovery.
 
+### Vercel (recommended — no port, no Docker)
+
+1. Go to [vercel.com](https://vercel.com) and sign in (GitHub).
+2. **Add New** → **Project** → Import your repo `Jita81/OpenClaw-Messaging`.
+3. Set **Root Directory** to `website` (click Edit, enter `website`, Save).
+4. Leave **Framework Preset** as Other (or leave default). No build command needed.
+5. Click **Deploy**. Vercel builds nothing and serves `index.html`, `nodes.json`, and `bootstrap.json` at the root. Done.
+6. Optional: add custom domain (e.g. openclawmessaging.com) in Project → Settings → Domains.
+
+Every push to `main` redeploys automatically.
+
 ### Railway (auto-deploy from GitHub)
 
 - **Option A — Docker:** From repo root, use Dockerfile at `website/Dockerfile`. In Railway: connect the repo, set **Dockerfile path** to `website/Dockerfile` (build context = repo root). Deploys serve `/`, `nodes.json`, and `bootstrap.json`.
