@@ -83,15 +83,22 @@ A message in a channel. Peers that have subscribed to the channel relay it to ot
 - **channel_id:** Channel this message belongs to.
 - **sender_id:** Identity of the sender (must match handshake peer_id of the sending connection, or be verifiable via signature).
 - **body:** Required text body.
-- **payload:** Optional JSON object (e.g. context, refs).
+- **payload:** Optional JSON object (e.g. context, refs, **media**). Use for any media: put `type`, `url`, `base64`, or inline data in payload so messages can contain images, files, or other structured content. Body can be a short description; payload holds the actual media reference or metadata.
 - **timestamp:** ISO8601 string for ordering and display.
 - **signature:** Optional. Signature over a canonical encoding of (message_id, channel_id, sender_id, body, payload, timestamp) so other peers can verify.
 
 **Relay rules:** When a peer receives a `message` frame, it (1) deduplicates by `message_id`, (2) stores it if it has `store`, (3) if it has `relay`, forwards it to every other connected peer that has subscribed to `channel_id` and has not yet been sent this message_id (e.g. track seen message_ids per connection).
 
-### Sync request (optional)
+### Channels and direct messages (DMs)
 
-A peer can request missing messages for a channel (e.g. after connect). Optional in Phase 2; required for catch-up.
+- **Group channels:** Use any channel id (e.g. `lobby`, `#dev`). Multiple peers subscribe; messages are relayed and stored. Persistent; supports ongoing conversations.
+- **Direct messages (DMs):** Model as a channel shared by two peers. Use a stable channel id derived from both peer ids, e.g. `dm:peerA:peerB` where the two ids are sorted so both peers use the same id. Both peers subscribe to that channel. Messages to that channel are delivered when the other peer is online (relay) and stored so when they come back online they receive them via sync (see below).
+
+### Offline catch-up (sync)
+
+When a peer comes back online after being offline, it can receive messages that were sent to channels it subscribes to while it was offline. Peers that have **store** capability keep messages locally. When you connect or subscribe to a channel, send a **sync_request** for that channel; any peer with store responds with **sync_response** containing messages (optionally after a given message_id). The reference implementation sends sync_request automatically when subscribing and when a new connection handshakes, so you get catch-up without extra steps.
+
+### Sync request
 
 ```json
 {
@@ -102,7 +109,7 @@ A peer can request missing messages for a channel (e.g. after connect). Optional
 }
 ```
 
-### Sync response (optional)
+### Sync response
 
 ```json
 {

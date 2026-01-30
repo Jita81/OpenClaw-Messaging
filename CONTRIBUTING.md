@@ -10,7 +10,7 @@ Contributions are welcome: fixes, features, docs, node registry improvements.
 ## Tests
 
 - Add tests for new features.
-- Ensure existing tests pass: `bash test-all.sh` and `node test-ws.mjs` (with server running).
+- Run the mesh peer (`npm start`) and verify it connects to bootstrap and accepts connections.
 
 ## Documentation
 

@@ -44,6 +44,7 @@ wss.on("connection", (ws) => {
 
 server.listen(PORT, HOST, async () => {
   console.log(`Mesh peer ${peerId} listening on ws://${HOST}:${PORT}`);
+  peer.subscribe("lobby");
   try {
     const peers = await peer.fetchBootstrap();
     if (peers.length) {

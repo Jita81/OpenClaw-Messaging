@@ -26,7 +26,7 @@ export type PeerConfig = {
   capabilities: { relay: boolean; store: boolean };
   /** If set, handshake includes public_key and outgoing messages are signed. */
   keypair?: KeyPair | null;
-  /** Called when a new message is stored (from mesh). Used by bridge to forward to legacy WS. */
+  /** Optional: called when a new message is stored (from mesh). */
   onMessage?: (msg: MeshMessage) => void;
 };
 
@@ -34,9 +34,12 @@ type PeerConnection = {
   ws: WebSocket;
   remotePeerId: string | null;
   remotePublicKeyPem: string | null;
+  remoteCapabilities: { relay?: boolean; store?: boolean };
   subscribedChannels: Set<string>;
   sentMessageIds: Set<string>;
   handshakeDone: boolean;
+  /** True if we opened this connection (we sent handshake first). */
+  isInitiator?: boolean;
 };
 
 const peerIdToPublicKeyPem = new Map<string, string>();
@@ -53,9 +56,12 @@ export type BootstrapResponse = {
   updated_at?: string;
 };
 
+const SYNC_LIMIT_DEFAULT = 100;
+
 export function createMeshPeer(config: PeerConfig) {
   initMeshStore(config.meshStorePath);
   const connections = new Map<WebSocket, PeerConnection>();
+  const mySubscribedChannels = new Set<string>();
 
   function getOrCreateConn(ws: WebSocket): PeerConnection {
     let c = connections.get(ws);
@@ -64,6 +70,7 @@ export function createMeshPeer(config: PeerConfig) {
         ws,
         remotePeerId: null,
         remotePublicKeyPem: null,
+        remoteCapabilities: {},
         subscribedChannels: new Set(),
         sentMessageIds: new Set(),
         handshakeDone: false,
@@ -128,15 +135,25 @@ export function createMeshPeer(config: PeerConfig) {
         const remotePub = frame.public_key as string | undefined;
         if (remotePub && conn.remotePeerId) peerIdToPublicKeyPem.set(conn.remotePeerId, remotePub);
         conn.remotePublicKeyPem = remotePub ?? null;
+        conn.remoteCapabilities = (frame.capabilities as { relay?: boolean; store?: boolean }) ?? {};
         conn.handshakeDone = true;
-        const handshakeReply: Record<string, unknown> = {
-          type: "handshake",
-          version: PROTOCOL_VERSION,
-          peer_id: config.peerId,
-          capabilities: config.capabilities,
-        };
-        if (config.keypair?.publicKey) handshakeReply.public_key = config.keypair.publicKey;
-        send(ws, handshakeReply);
+        if (!conn.isInitiator) {
+          const handshakeReply: Record<string, unknown> = {
+            type: "handshake",
+            version: PROTOCOL_VERSION,
+            peer_id: config.peerId,
+            capabilities: config.capabilities,
+          };
+          if (config.keypair?.publicKey) handshakeReply.public_key = config.keypair.publicKey;
+          send(ws, handshakeReply);
+        }
+        // Send our subscriptions and request catch-up from this peer if it stores
+        for (const ch of mySubscribedChannels) {
+          send(ws, { type: "subscribe", channel_id: ch });
+          if (conn.remoteCapabilities.store) {
+            send(ws, { type: "sync_request", channel_id: ch, after_message_id: null, limit: SYNC_LIMIT_DEFAULT });
+          }
+        }
         break;
       }
       case "subscribe": {
@@ -186,6 +203,51 @@ export function createMeshPeer(config: PeerConfig) {
         config.onMessage?.(meshMsg);
         break;
       }
+      case "sync_request": {
+        const channelId = frame.channel_id as string;
+        const afterMessageId = (frame.after_message_id as string) ?? undefined;
+        const limit = Math.min(Number(frame.limit) || SYNC_LIMIT_DEFAULT, 500);
+        if (!channelId || !config.capabilities.store) break;
+        const messages = getMeshMessages(channelId, { afterMessageId, limit });
+        const payload: Record<string, unknown>[] = messages.map((m) => {
+          let pl: unknown = undefined;
+          if (m.payload) try { pl = JSON.parse(m.payload); } catch { /* ignore */ }
+          return {
+            type: "message",
+            message_id: m.message_id,
+            channel_id: m.channel_id,
+            sender_id: m.sender_id,
+            body: m.body,
+            payload: pl,
+            timestamp: m.timestamp,
+          };
+        });
+        send(ws, { type: "sync_response", channel_id: channelId, messages: payload });
+        break;
+      }
+      case "sync_response": {
+        const channelId = frame.channel_id as string;
+        const messages = (frame.messages as Record<string, unknown>[]) ?? [];
+        for (const msg of messages) {
+          const messageId = msg.message_id as string;
+          const senderId = msg.sender_id as string;
+          const body = msg.body as string;
+          const timestamp = (msg.timestamp as string) ?? new Date().toISOString();
+          if (!messageId || !channelId || !senderId || body === undefined) continue;
+          const meshMsg: MeshMessage = {
+            message_id: messageId,
+            channel_id: channelId,
+            sender_id: senderId,
+            body,
+            payload: msg.payload != null ? JSON.stringify(msg.payload) : null,
+            timestamp,
+          };
+          if (hasMeshMessage(messageId)) continue;
+          if (config.capabilities.store) insertMeshMessage(meshMsg);
+          config.onMessage?.(meshMsg);
+        }
+        break;
+      }
       default:
         break;
     }
@@ -210,6 +272,8 @@ export function createMeshPeer(config: PeerConfig) {
       if (!p.ws_url || p.peer_id === config.peerId) continue;
       try {
         const ws = new WebSocket(p.ws_url);
+        const c = getOrCreateConn(ws);
+        c.isInitiator = true;
         ws.on("open", () => {
           const handshake: Record<string, unknown> = {
             type: "handshake",
@@ -223,7 +287,6 @@ export function createMeshPeer(config: PeerConfig) {
         ws.on("message", (data: Buffer) => handleFrame(ws, data));
         ws.on("close", () => connections.delete(ws));
         ws.on("error", () => connections.delete(ws));
-        getOrCreateConn(ws);
       } catch {
         // skip failed connect
       }
@@ -231,10 +294,14 @@ export function createMeshPeer(config: PeerConfig) {
   }
 
   function subscribe(channelId: string) {
+    mySubscribedChannels.add(channelId);
     for (const [ws, conn] of connections) {
       if (conn.handshakeDone) {
         conn.subscribedChannels.add(channelId);
         send(ws, { type: "subscribe", channel_id: channelId });
+        if (conn.remoteCapabilities.store) {
+          send(ws, { type: "sync_request", channel_id: channelId, after_message_id: null, limit: SYNC_LIMIT_DEFAULT });
+        }
       }
     }
   }

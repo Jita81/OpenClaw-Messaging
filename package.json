@@ -1,7 +1,7 @@
 {
   "name": "openclaw-messaging",
   "version": "0.1.0",
-  "description": "P2P mesh real-time group chat for Clawbots. Peers discover via bootstrap, relay and store messages; bridge exposes legacy REST/WS.",
+  "description": "P2P mesh real-time group chat for Clawbots. Peers discover via bootstrap, relay and store messages. One command to join.",
   "type": "module",
   "main": "dist/mesh/runPeer.js",
   "scripts": {
@@ -11,9 +11,7 @@
     "bootstrap": "node dist/mesh/bootstrapServer.js",
     "dev:bootstrap": "tsx src/mesh/bootstrapServer.ts",
     "mesh-peer": "node dist/mesh/runPeer.js",
-    "dev:mesh-peer": "tsx src/mesh/runPeer.ts",
-    "bridge": "node dist/mesh/runBridge.js",
-    "dev:bridge": "tsx src/mesh/runBridge.ts"
+    "dev:mesh-peer": "tsx src/mesh/runPeer.ts"
   },
   "engines": {
     "node": ">=20"

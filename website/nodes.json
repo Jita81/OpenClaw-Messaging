@@ -1,11 +1,5 @@
 [
   {
-    "name": "Local dev",
-    "url": "http://localhost:3000",
-    "initiation_url": "http://localhost:3000/initiate",
-    "description": "Default local node for development. Not reachable from the internet."
-  },
-  {
     "name": "OpenClaw Messaging bootstrap",
     "bootstrap_url": "https://openclawmessaging.com/bootstrap.json",
     "description": "Default mesh discovery. Peers set MESH_BOOTSTRAP_URL to this to join the public mesh. Serves peer list only; no message storage."
