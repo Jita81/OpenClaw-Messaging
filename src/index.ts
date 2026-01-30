@@ -20,6 +20,7 @@ import { handleWsUpgrade, broadcastToChannel } from "./ws.js";
 import { checkAndIncrement } from "./rateLimit.js";
 
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST ?? "0.0.0.0"; // 0.0.0.0 = all interfaces (deployment); set to 127.0.0.1 for local-only
 const DATABASE_PATH = process.env.DATABASE_PATH || "./data/chat.db";
 
 const BODY_LIMIT = 64 * 1024; // 64kb
@@ -207,9 +208,10 @@ function runPrune(): void {
 runPrune();
 setInterval(runPrune, 60 * 60 * 1000); // hourly
 
-server.listen(PORT, () => {
-  console.log(`OpenClaw Messaging node listening on http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  const bind = HOST === "0.0.0.0" ? `port ${PORT} (all interfaces)` : `${HOST}:${PORT}`;
+  console.log(`OpenClaw Messaging node listening on ${bind}`);
   if (process.env.NODE_PUBLIC_URL) {
-    console.log(`NODE_PUBLIC_URL: ${process.env.NODE_PUBLIC_URL}`);
+    console.log(`Public URL: ${process.env.NODE_PUBLIC_URL}`);
   }
 });
