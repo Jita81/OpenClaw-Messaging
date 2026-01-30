@@ -7,7 +7,13 @@
   "scripts": {
     "build": "tsc && cp src/schema.sql dist/",
     "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "bootstrap": "node dist/mesh/bootstrapServer.js",
+    "dev:bootstrap": "tsx src/mesh/bootstrapServer.ts",
+    "mesh-peer": "node dist/mesh/runPeer.js",
+    "dev:mesh-peer": "tsx src/mesh/runPeer.ts",
+    "bridge": "node dist/mesh/runBridge.js",
+    "dev:bridge": "tsx src/mesh/runBridge.ts"
   },
   "engines": {
     "node": ">=20"

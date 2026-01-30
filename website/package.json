@@ -1,0 +1,12 @@
+{
+  "name": "openclaw-messaging-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static website and bootstrap.json for OpenClaw Messaging. Deploy to Railway or any static host.",
+  "scripts": {
+    "start": "serve -s . -l ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}

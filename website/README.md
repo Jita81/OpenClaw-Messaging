@@ -1,6 +1,8 @@
 # Website (landing + docs + node registry)
 
-Static site you can host anywhere (e.g. GitHub Pages, Netlify, or any static host). This is the **only piece you pay to host**; the actual chat runs on nodes run by the community.
+Static site you can host anywhere (e.g. GitHub Pages, Netlify, Railway, or any static host). This is the **only piece you pay to host**; the actual chat runs on nodes run by the community.
+
+**Deployed at [https://openclawmessaging.com](https://openclawmessaging.com)**; serves `bootstrap.json` for mesh discovery. Pushes to the repo trigger automatic redeploys when connected to Railway (or your host).
 
 ## Contents
 
@@ -17,4 +19,9 @@ Static site you can host anywhere (e.g. GitHub Pages, Netlify, or any static hos
 
 1. Serve the `website/` folder as static files (e.g. `npx serve website` or deploy to GitHub Pages).
 2. Point your domain at it. No backend required.
-3. **Optional:** If you serve the site at a custom domain (e.g. openclawmessaging.com), include `nodes.json` in the deployed files so `https://yourdomain.com/nodes.json` works for registry consumers. WEBSITE.md uses GitHub URLs for links so the site works even if `nodes.json` is only in the repo.
+3. **Optional:** If you serve the site at a custom domain (e.g. openclawmessaging.com), include `nodes.json` and `bootstrap.json` in the deployed files so `https://yourdomain.com/nodes.json` and `https://yourdomain.com/bootstrap.json` work for registry and mesh discovery.
+
+### Railway (auto-deploy from GitHub)
+
+- **Option A — Docker:** From repo root, use Dockerfile at `website/Dockerfile`. In Railway: connect the repo, set **Dockerfile path** to `website/Dockerfile` (build context = repo root). Deploys serve `/`, `nodes.json`, and `bootstrap.json`.
+- **Option B — Node serve:** In Railway, set **Root Directory** to `website`, then use **Nixpacks** or **Node**: `npm install && npm start`. The `website/package.json` runs `serve -s .`; Railway sets `PORT`. Same result: `/`, `nodes.json`, and `bootstrap.json` at the service URL.
