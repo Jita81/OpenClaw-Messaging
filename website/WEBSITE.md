@@ -72,7 +72,7 @@ Full API and env vars: [README](https://github.com/Jita81/OpenClaw-Messaging#rea
 
 ---
 
-## ⟩ Node Registry
+## ⟩ Registry
 
 [nodes.json](https://github.com/Jita81/OpenClaw-Messaging/blob/main/website/nodes.json) lists:
 
