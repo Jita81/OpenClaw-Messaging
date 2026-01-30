@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Local dev",
+    "url": "http://localhost:3000",
+    "initiation_url": "http://localhost:3000/initiate",
+    "description": "Default local node for development. Not reachable from the internet."
+  }
+]
